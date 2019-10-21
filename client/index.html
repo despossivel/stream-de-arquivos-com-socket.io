@@ -1,37 +1,27 @@
 <input id="file" type="file" />
- 
+
 <script type="text/javascript" src="http://192.168.4.113:21041/socket.io/socket.io.js"></script>
 <script src="./socket.io-stream.js"></script>
 <script src="./jquery.js"></script>
 <script>
 
-  var socket = io.connect('http://192.168.4.113:21041');
- 
-  $('#file').change(function(e) {
-    var file = e.target.files[0];
-    var stream = ss.createStream();
- 
- 
-    // upload a file to the server. 
-    ss(socket).emit('file', stream, {size: file.size,name:file.name});
+  const socket = io.connect('http://192.168.4.113:21041');
+
+  $('#file').change(function (e) {
+    const file = e.target.files[0];
+    const stream = ss.createStream();
+
+    ss(socket).emit('file', stream, { size: file.size, name: file.name });
     ss.createBlobReadStream(file).pipe(stream);
 
+    const blobStream = ss.createBlobReadStream(file);
+    let size = 0;
 
+    blobStream.on('data', function (chunk) {
+      size += chunk.length;
+      console.log(Math.floor(size / file.size * 100) + '%');
+    });
 
-		var blobStream = ss.createBlobReadStream(file);
-		var size = 0;
-		 
-		blobStream.on('data', function(chunk) {
-		  size += chunk.length;
-		  console.log(Math.floor(size / file.size * 100) + '%');
-		  // -> e.g. '42%' 
-		});
-		 
-		blobStream.pipe(stream);
-
-
-
-
+    blobStream.pipe(stream);
   });
-
-</script> 
+</script>
